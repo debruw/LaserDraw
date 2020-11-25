@@ -16,6 +16,7 @@ public class MappingModeController : MonoBehaviour
     public Text playLabel;
     public InputField speedInput;
     public AudioSource audio;
+    public GameObject GhostButton;
 
     public GameObject buttonPrefab;
     public float scaleSensitivity;
@@ -26,7 +27,7 @@ public class MappingModeController : MonoBehaviour
     private Vector3 lastPosition = new Vector3();
 
     private Stopwatch mapTimer = new Stopwatch();
-    
+
     private SortedDictionary<float, ButtonItem> mappedButtons = new SortedDictionary<float, ButtonItem>();
     private SortedList<float, MappingButton> displayingButtons = new SortedList<float, MappingButton>();
 
@@ -41,15 +42,33 @@ public class MappingModeController : MonoBehaviour
     }
 
     // Update is called once per frame
-    private void Update ()
+    private void Update()
     {
         this.UpdatePositionLabel(Input.mousePosition.x, Input.mousePosition.y);
         this.UpdateTimerLabel();
+        GhostButton.transform.position = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0);
 
         if (this.mapTimer.IsRunning && Input.GetMouseButtonDown(0))
         {
             this.curPosition[0] = Input.mousePosition.x;
+            //if (curPosition[0] < 106)
+            //{
+            //    curPosition[0] = 106;
+            //}
+            //else if (curPosition[0] > 330)
+            //{
+            //    curPosition[0] = 330;
+            //}
+
             this.curPosition[1] = Input.mousePosition.y;
+            //if (curPosition[1] < 76)
+            //{
+            //    curPosition[1] = 76;
+            //}
+            //else if (curPosition[1] > 177)
+            //{
+            //    curPosition[1] = 177;
+            //}
             this.curTime = this.mapTimer.ElapsedMilliseconds;
 
             this.curButton = this.CreateButton(this.curPosition[0], this.curPosition[1]);
@@ -122,7 +141,7 @@ public class MappingModeController : MonoBehaviour
 
     private void ButtonsToHide(float start, float end)
     {
-        foreach(KeyValuePair<float, MappingButton> pair in displayingButtons)
+        foreach (KeyValuePair<float, MappingButton> pair in displayingButtons)
         {
             if ((pair.Key - GetSpeedInputVal()) < start)
             {
@@ -144,7 +163,7 @@ public class MappingModeController : MonoBehaviour
     {
         if (this.mapTimer.IsRunning)
         {
-            if(this.audio.clip != null)
+            if (this.audio.clip != null)
             {
                 audio.Pause();
             }
@@ -175,14 +194,14 @@ public class MappingModeController : MonoBehaviour
         {
             float.TryParse(this.speedInput.text, out speed);
         }
-        return (speed*1000);
+        return (speed * 1000);
     }
 
     public void OnMapFinish()
     {
         ButtonData buttonData = new ButtonData();
 
-        foreach(KeyValuePair<float, ButtonItem> pair in this.mappedButtons)
+        foreach (KeyValuePair<float, ButtonItem> pair in this.mappedButtons)
         {
             buttonData.buttons.Add(pair.Value);
         }
@@ -201,7 +220,7 @@ public class MappingModeController : MonoBehaviour
         string filePath = EditorUtility.OpenFilePanel("Select music file", Application.dataPath + "/Resources", "mp3");
         string[] path = filePath.Split('/');
         string clipName = path[path.Length - 1].Split('.')[0];
- 
+
         AudioClip clip = Resources.Load(clipName) as AudioClip;
 
         this.audio.clip = clip;

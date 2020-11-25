@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 public class InputController : MonoBehaviour
 {
-    public GameObject buttonPrefab;
+    public GameObject[] buttonPrefabs;
     public Text scoreLabel;
     public string gameDataFileName;
     public float gameSpeed;
@@ -89,7 +89,7 @@ public class InputController : MonoBehaviour
 
     public void CreateButton(float startTime, float[] startPos, bool isDrag, float[] endPos, int buttonNum)
     {
-        GameObject button = Instantiate(buttonPrefab, new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
+        GameObject button = Instantiate(buttonPrefabs[Random.Range(0,1)], new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
         button.transform.SetParent(GameObject.FindGameObjectWithTag("GameController").transform, false);
         ButtonController buttonController = button.GetComponent<ButtonController>();
 
@@ -111,7 +111,7 @@ public class InputController : MonoBehaviour
         if (isFirstButton)
         {
             isFirstButton = false;
-            GameManager.Instance.StartDraw();
+            GameManager.Instance.isDrawStarted = true;
         }
         else
         {

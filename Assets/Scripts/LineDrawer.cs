@@ -14,6 +14,8 @@ public class LineDrawer : MonoBehaviour
     public float lineDrawSpeed;
     [HideInInspector]
     public float lineDefaultSpeed;
+    public Light pointLight;
+    public Gradient RainbowColor;
 
     private void Start()
     {
@@ -47,11 +49,7 @@ public class LineDrawer : MonoBehaviour
             float x = Mathf.Lerp(0, dist, counter);
 
             pointA = LinePoints[i].position;
-            if (isLast)
-            {
-                pointB = LinePoints[0].position;
-            }
-            else
+            if (!isLast)
             {
                 pointB = LinePoints[i + 1].position;
             }
@@ -63,27 +61,35 @@ public class LineDrawer : MonoBehaviour
         }
         else
         {
+            LineRenderer.SetPosition(i + 1, pointB);
+            if (pointLight.intensity < 4.25f)
+            {
+                pointLight.intensity += (4.25f / LinePoints.Length);
+            }
             if (LinePoints.Length - 1 > i + 1)
             {
                 counter = 0;
                 i++;
                 dist = Vector3.Distance(LinePoints[i].position, LinePoints[i + 1].position);
                 LineRenderer.positionCount++;
-                LineRenderer.SetPosition(LineRenderer.positionCount - 1, LineRenderer.GetPosition(LineRenderer.positionCount - 2));                
+                LineRenderer.SetPosition(LineRenderer.positionCount - 1, LineRenderer.GetPosition(LineRenderer.positionCount - 2));
             }
             else if (!isLast)
             {
-                counter = 0;
-                i++;
-                dist = Vector3.Distance(LinePoints[i].position, LinePoints[0].position);                
-                LineRenderer.positionCount++;
-                LineRenderer.SetPosition(LineRenderer.positionCount - 1, LineRenderer.GetPosition(LineRenderer.positionCount - 2));
+                //counter = 0;
+                //i++;
+                //dist = Vector3.Distance(LinePoints[i].position, LinePoints[0].position);
+                //LineRenderer.positionCount++;
+                //LineRenderer.SetPosition(LineRenderer.positionCount - 1, LineRenderer.GetPosition(LineRenderer.positionCount - 2));
                 isLast = true;
             }
             else
             {
+                LineRenderer.colorGradient = RainbowColor;
                 Sparks.SetActive(false);
-
+                GameManager.Instance.inputController.gameTimer.Stop();
+                GameManager.Instance.isDrawStarted = false;
+                GameManager.Instance.ExplodeFireworks();
             }
         }
     }

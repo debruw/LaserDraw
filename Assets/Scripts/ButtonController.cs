@@ -9,6 +9,7 @@ public class ButtonController : MonoBehaviour
     public Button startButton;
     public Button endButton;
     public Image dragRegion;
+    public Image dragDirection;
     private Stopwatch buttonTimer;
     public Text startButtonText;
     public Text endButtonText;
@@ -59,14 +60,18 @@ public class ButtonController : MonoBehaviour
 
         this.dragRegion.gameObject.transform.localScale = new Vector3((scaleX + scaleY)/100f, 1f);
         this.dragRegion.gameObject.transform.position = centerPos;
+        dragDirection.transform.position = centerPos;
 
         float angle = Mathf.Atan2(y2 - y1, x2 - x1);
         this.dragRegion.gameObject.transform.rotation = Quaternion.Euler(0f, 0f, angle * Mathf.Rad2Deg);
+        dragDirection.transform.rotation = Quaternion.Euler(0f, 0f, angle * Mathf.Rad2Deg);
 
         this.endButton.transform.SetParent(this.gameObject.transform, false);
         this.endButton.transform.position = new Vector3(x2, y2);
+        
 
         this.dragRegion.gameObject.SetActive(true);
+        this.dragDirection.gameObject.SetActive(true);
         this.endButton.gameObject.SetActive(true);
     }
 	
@@ -89,7 +94,10 @@ public class ButtonController : MonoBehaviour
         else if (Input.GetMouseButton(0) && this.beginDragEvent && this.indicatorCollision.isHit)
         {
             StartCoroutine(this.MoveIndicator());
-
+            if(startButton.gameObject.activeSelf)
+            {
+                StartCoroutine(StartButtonFadeAway());
+            }
             this.buttonScore += ButtonController.DragScoreModifier;
         }
         else if(Input.GetMouseButtonUp(0) && this.beginDragEvent)
@@ -207,9 +215,9 @@ public class ButtonController : MonoBehaviour
         while (ElapsedTime < TotalTime)
         {
             ElapsedTime += Time.deltaTime;
-            this.startButton.image.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
             this.endButton.image.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
             this.dragRegion.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
+            this.dragDirection.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
             this.indicator.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
 
             if (this.isDrag)
@@ -217,19 +225,58 @@ public class ButtonController : MonoBehaviour
                 this.endButtonText.text = (Mathf.RoundToInt((this.buttonScore * 1000) / 100) * 100).ToString();
                 this.endButtonText.gameObject.transform.position = Vector3.Lerp(originalPosition, destination, (ElapsedTime / TotalTime));
             }
-            else
-            {
-                this.startButtonText.text = (Mathf.RoundToInt((this.buttonScore*1000)/100)*100).ToString();
-                this.startButtonText.gameObject.transform.position = Vector3.Lerp(originalPosition, destination, (ElapsedTime / TotalTime));
-            }
 
-            this.startButtonText.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
             this.endButtonText.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
 
             yield return null;
         }
 
         Destroy(this.gameObject);
+    }
+
+    public IEnumerator StartButtonFadeAway()
+    {
+        Collider2D buttonCollider = this.indicator.GetComponent<CircleCollider2D>();
+        if (buttonCollider != null)
+        {
+            buttonCollider.enabled = false;
+        }
+
+        Color originalColor = this.startButton.image.color;
+        Color finalColor = new Color(this.startButton.image.color.r, this.startButton.image.color.g, this.startButton.image.color.b, 0);
+        Color finalTextColor = new Color(this.startButton.image.color.r, this.startButton.image.color.g, this.startButton.image.color.b, 0.25f);
+
+        Vector3 originalPosition = new Vector3();
+        if (this.isDrag)
+        {
+            originalPosition = this.endButtonText.transform.position;
+        }
+        else
+        {
+            originalPosition = this.startButtonText.transform.position;
+
+        }
+        Vector3 destination = new Vector3(originalPosition.x, originalPosition.y + 50);
+
+        float ElapsedTime = 0.0f;
+        float TotalTime = 0.6f;
+        while (ElapsedTime < TotalTime)
+        {
+            ElapsedTime += Time.deltaTime;
+            this.startButton.image.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
+
+            if (!this.isDrag)
+            {
+                this.startButtonText.text = (Mathf.RoundToInt((this.buttonScore * 1000) / 100) * 100).ToString();
+                this.startButtonText.gameObject.transform.position = Vector3.Lerp(originalPosition, destination, (ElapsedTime / TotalTime));
+            }
+
+            this.startButtonText.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
+
+            yield return null;
+        }
+
+        //Destroy(this.gameObject);
     }
 
 }

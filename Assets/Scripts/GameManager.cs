@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -25,24 +27,82 @@ public class GameManager : MonoBehaviour
     public LineDrawer lineDrawer;
     public bool isGameStarted, isDrawStarted, isComboActive;
 
+    #region UI Elements
+    public Text CountDownText;
+    public GameObject WinPanel, LosePanel, IngamePanel;
+    #endregion
+
+    private void Start()
+    {
+        StartCoroutine(Countdown(3));
+    }
+
+    IEnumerator Countdown(int seconds)
+    {
+        int count = seconds;
+
+        while (count > 0)
+        {
+            // display something...
+            CountDownText.text = count.ToString();
+            yield return new WaitForSeconds(1);
+            count--;
+        }
+
+        // count down is finished...
+        CountDownText.gameObject.SetActive(false);
+        StartGame();
+    }
+
     public void StartGame()
     {
         isGameStarted = true;
-        inputController.StartTimer();
+        inputController.StartTimer();        
     }
 
-    public void StartDraw()
+    public void Restart()
     {
-        isDrawStarted = true;
+        SceneManager.LoadScene(0);
     }
 
     public void SpeedUpDraw()
     {
-        lineDrawer.lineDrawSpeed += .1f;
+        lineDrawer.lineDrawSpeed = lineDrawer.lineDefaultSpeed * 2;
     }
 
     public void SpeedDownDraw()
     {
         lineDrawer.lineDrawSpeed = lineDrawer.lineDefaultSpeed;
+    }
+
+    public GameObject Fireworks;
+    public void ExplodeFireworks()
+    {
+        Fireworks.SetActive(true);
+        StartCoroutine(WaitAndWin());
+    }
+
+    IEnumerator WaitAndWin()
+    {
+        yield return new WaitForSeconds(1f);
+        GameWin();
+    }
+
+    void GameWin()
+    {
+        IngamePanel.SetActive(false);
+        WinPanel.SetActive(true);
+    }
+
+    IEnumerator WaitAndLose()
+    {
+        yield return new WaitForSeconds(1f);
+        GameLose();
+    }
+
+    void GameLose()
+    {
+        IngamePanel.SetActive(false);
+        LosePanel.SetActive(true);
     }
 }
