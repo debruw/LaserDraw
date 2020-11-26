@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class LineDrawer : MonoBehaviour
 {
-    public LineRenderer LineRenderer;
+    public LineRenderer LineRenderer, BeamEffect;
     public GameObject Sparks;
     private float counter;
     private float dist;
@@ -58,6 +58,7 @@ public class LineDrawer : MonoBehaviour
             LineRenderer.SetPosition(i + 1, pointAlongLine);
 
             Sparks.transform.position = pointAlongLine;
+            BeamEffect.SetPosition(1, pointAlongLine);
         }
         else
         {
