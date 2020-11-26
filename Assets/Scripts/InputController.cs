@@ -8,13 +8,8 @@ using UnityEngine.UI;
 
 public class InputController : MonoBehaviour
 {
-    public GameObject[] buttonPrefabs;
-    public Text scoreLabel;
-    public string gameDataFileName;
-    public float gameSpeed;
+    public GameObject[] buttons;
 
-    private int gameScore = 0;
-    private int roundedButtonCount;
     public Stopwatch gameTimer = new Stopwatch();
 
     private SortedList<float, ButtonItem> gameButtons = new SortedList<float, ButtonItem>();
@@ -22,21 +17,16 @@ public class InputController : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        if (!this.LoadGameData())
-        {
-            return;
-        }
-        
         ButtonController.OnClicked += OnGameButtonClick;
-
-        this.roundedButtonCount = this.ButtonCountInitializer();
     }
 
     public void StartTimer()
     {
         this.gameTimer.Start();
+        ActivateButton();
     }
 
+    int currentButton;
     // Update is called once per frame
     void Update()
     {
@@ -44,69 +34,43 @@ public class InputController : MonoBehaviour
         {
             return;
         }
-        if (this.gameButtons.Count > 0 && this.gameTimer.ElapsedMilliseconds > this.gameButtons.Keys[0])
-        {
-            int buttonNum = 4 - System.Math.Abs(this.roundedButtonCount) % 4;
-            float keyTime = this.gameButtons.Keys[0];
 
-            this.CreateButton(gameTimer.ElapsedMilliseconds, this.gameButtons[keyTime].position,
-                this.gameButtons[keyTime].isDrag, this.gameButtons[keyTime].endPosition, buttonNum);
+        //if (this.gameButtons.Count > 0 && this.gameTimer.ElapsedMilliseconds > this.gameButtons.Keys[0])
+        //{
+        //    int buttonNum = 4 - System.Math.Abs(this.roundedButtonCount) % 4;
+        //    float keyTime = this.gameButtons.Keys[0];
 
-            if (this.gameButtons[keyTime].isDrag)
-            {
-                this.roundedButtonCount--;
-            }
+        //    this.gameButtons.Remove(keyTime);
+        //}
+        //else if (gameButtons.Count == 0)
+        //{
 
-            this.gameButtons.Remove(keyTime);
-            this.roundedButtonCount--;
-        }
-        else if (gameButtons.Count == 0)
-        {
-
-        }
+        //}
     }
 
-    private bool LoadGameData()
+    public void ActivateButton()
     {
-        string filePath = Path.Combine(Application.streamingAssetsPath, gameDataFileName);
-
-        if (File.Exists(filePath))
-        {
-            string dataAsJson = File.ReadAllText(filePath);
-
-            ButtonData buttonData = JsonUtility.FromJson<ButtonData>(dataAsJson);
-
-            for (int i = 0; i < buttonData.buttons.Count; ++i)
-            {
-                this.gameButtons.Add(buttonData.buttons[i].time, buttonData.buttons[i]);
-            }
-
-            return true;
-        }
-
-        return false;
+        StartCoroutine(WaitAndActivate());
     }
 
-    public void CreateButton(float startTime, float[] startPos, bool isDrag, float[] endPos, int buttonNum)
+    ButtonController buttonController;
+    IEnumerator WaitAndActivate()
     {
-        GameObject button = Instantiate(buttonPrefabs[Random.Range(0,1)], new Vector3(0, 0, 0), Quaternion.identity) as GameObject;
-        button.transform.SetParent(GameObject.FindGameObjectWithTag("GameController").transform, false);
-        ButtonController buttonController = button.GetComponent<ButtonController>();
-
-        buttonController.startButtonText.text = buttonNum.ToString();
-        if (isDrag)
+        yield return new WaitForSeconds(2);
+        if (currentButton < buttons.Length)
         {
-            buttonController.endButtonText.text = (buttonNum + 1).ToString();
+            buttonController = buttons[currentButton].GetComponent<ButtonController>();
+            buttonController.InitializeButton(gameTimer.ElapsedMilliseconds);
+            currentButton++;
         }
-
-        buttonController.duration = gameSpeed;
-        buttonController.InitializeButton(startTime, startPos[0], startPos[1], isDrag, endPos[0], endPos[1]);
     }
 
     bool isFirstButton = true;
     public void OnGameButtonClick(ButtonController button)
     {
         UnityEngine.Debug.Log("ButtonClick");
+        GameManager.Instance.inputController.ActivateButton();       
+        
         //TODO clicked
         if (isFirstButton)
         {
@@ -118,14 +82,6 @@ public class InputController : MonoBehaviour
             GameManager.Instance.isComboActive = true;
             GameManager.Instance.SpeedUpDraw();
         }
-
-        this.gameScore += (Mathf.RoundToInt((button.buttonScore * 1000) / 100) * 100);
-        this.UpdateScoreLabel(gameScore);
-    }
-
-    private void UpdateScoreLabel(int scoreValue)
-    {
-        this.scoreLabel.text = scoreValue.ToString();
     }
 
     private int ButtonCountInitializer()

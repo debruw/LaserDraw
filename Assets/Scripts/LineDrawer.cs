@@ -41,10 +41,10 @@ public class LineDrawer : MonoBehaviour
         {
             Sparks.SetActive(true);
         }
-
+        Debug.Log(counter + " / " + dist);
         if (counter < dist)
         {
-            counter += lineDrawSpeed / 100;
+            counter += lineDrawSpeed * Time.deltaTime;
 
             float x = Mathf.Lerp(0, dist, counter);
 
