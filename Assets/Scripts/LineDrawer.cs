@@ -15,7 +15,7 @@ public class LineDrawer : MonoBehaviour
     [HideInInspector]
     public float lineDefaultSpeed;
     public Light pointLight;
-    public Gradient RainbowColor;
+    public Gradient[] RainbowColors;
 
     private void Start()
     {
@@ -28,12 +28,13 @@ public class LineDrawer : MonoBehaviour
     }
 
     int i;
-    Vector3 pointA, pointB, pointAlongLine;
+    [HideInInspector]
+    public Vector3 pointA, pointB, pointAlongLine;
     bool isLast;
 
     private void Update()
     {
-        if (!GameManager.Instance.isDrawStarted)
+        if (!GameManager.Instance.isDrawStarted || GameManager.Instance.isGameOver)
         {
             return;
         }
@@ -41,9 +42,9 @@ public class LineDrawer : MonoBehaviour
         {
             Sparks.SetActive(true);
         }
-        Debug.Log(counter + " / " + dist);
         if (counter < dist)
         {
+            Debug.Log("1");
             counter += lineDrawSpeed * Time.deltaTime;
 
             float x = Mathf.Lerp(0, dist, counter);
@@ -62,6 +63,7 @@ public class LineDrawer : MonoBehaviour
         }
         else
         {
+            Debug.Log("2");
             LineRenderer.SetPosition(i + 1, pointB);
             if (pointLight.intensity < 4.25f)
             {
@@ -86,12 +88,28 @@ public class LineDrawer : MonoBehaviour
             }
             else
             {
-                LineRenderer.colorGradient = RainbowColor;
+                LineRenderer.colorGradient = RainbowColors[0];
                 Sparks.SetActive(false);
                 GameManager.Instance.inputController.gameTimer.Stop();
+                StartCoroutine(WaitAndChangeColor());
                 GameManager.Instance.isDrawStarted = false;
                 GameManager.Instance.ExplodeFireworks();
             }
+        }
+    }
+
+    int currentColor;
+    IEnumerator WaitAndChangeColor()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(.5f);
+            currentColor++;
+            if (currentColor > RainbowColors.Length - 1)
+            {
+                currentColor = 0;
+            }
+            LineRenderer.colorGradient = RainbowColors[currentColor];
         }
     }
 }

@@ -25,7 +25,7 @@ public class GameManager : MonoBehaviour
 
     public InputController inputController;
     public LineDrawer lineDrawer;
-    public bool isGameStarted, isDrawStarted, isComboActive;
+    public bool isGameOver, isDrawStarted, isComboActive;
 
     #region UI Elements
     public Text CountDownText;
@@ -56,8 +56,8 @@ public class GameManager : MonoBehaviour
 
     public void StartGame()
     {
-        isGameStarted = true;
-        inputController.StartTimer();        
+        inputController.StartTimer();
+        GameManager.Instance.isDrawStarted = true;
     }
 
     public void Restart()
@@ -68,11 +68,6 @@ public class GameManager : MonoBehaviour
     public void SpeedUpDraw()
     {
         lineDrawer.lineDrawSpeed = lineDrawer.lineDefaultSpeed * 2;
-    }
-
-    public void SpeedDownDraw()
-    {
-        lineDrawer.lineDrawSpeed = lineDrawer.lineDefaultSpeed;
     }
 
     public GameObject Fireworks;
@@ -92,6 +87,13 @@ public class GameManager : MonoBehaviour
     {
         IngamePanel.SetActive(false);
         WinPanel.SetActive(true);
+    }
+
+    public void Lose()
+    {
+        isGameOver = true;
+        lineDrawer.Sparks.SetActive(false);
+        StartCoroutine(WaitAndLose());
     }
 
     IEnumerator WaitAndLose()

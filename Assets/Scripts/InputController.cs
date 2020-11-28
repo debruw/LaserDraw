@@ -12,7 +12,7 @@ public class InputController : MonoBehaviour
 
     public Stopwatch gameTimer = new Stopwatch();
 
-    private SortedList<float, ButtonItem> gameButtons = new SortedList<float, ButtonItem>();
+    public GameObject WrongLine1, WrongLine2, WrongLine3;
 
     // Use this for initialization
     void Start()
@@ -27,36 +27,41 @@ public class InputController : MonoBehaviour
     }
 
     int currentButton;
-    // Update is called once per frame
-    void Update()
+
+    public void ActivateWrongClick()
     {
-        if (!GameManager.Instance.isGameStarted)
+        GameManager.Instance.lineDrawer.lineDrawSpeed = 0;
+        if(!WrongLine1.gameObject.activeSelf)
         {
-            return;
+            WrongLine1.GetComponent<LineRenderer>().SetPosition(0, GameManager.Instance.lineDrawer.pointAlongLine);
+            WrongLine1.SetActive(true);
         }
-
-        //if (this.gameButtons.Count > 0 && this.gameTimer.ElapsedMilliseconds > this.gameButtons.Keys[0])
-        //{
-        //    int buttonNum = 4 - System.Math.Abs(this.roundedButtonCount) % 4;
-        //    float keyTime = this.gameButtons.Keys[0];
-
-        //    this.gameButtons.Remove(keyTime);
-        //}
-        //else if (gameButtons.Count == 0)
-        //{
-
-        //}
+        else if(WrongLine1.gameObject.activeSelf && !WrongLine2.gameObject.activeSelf)
+        {
+            WrongLine2.GetComponent<LineRenderer>().SetPosition(0, GameManager.Instance.lineDrawer.pointAlongLine);
+            WrongLine2.SetActive(true);
+        }
+        else if(WrongLine2.gameObject.activeSelf)
+        {
+            WrongLine3.GetComponent<LineRenderer>().SetPosition(0, GameManager.Instance.lineDrawer.pointAlongLine);
+            WrongLine3.SetActive(true);
+            GameManager.Instance.Lose();            
+        }
     }
 
     public void ActivateButton()
     {
+        if (GameManager.Instance.isGameOver)
+        {
+            return;
+        }
         StartCoroutine(WaitAndActivate());
     }
 
     ButtonController buttonController;
     IEnumerator WaitAndActivate()
     {
-        yield return new WaitForSeconds(2);
+        yield return new WaitForSeconds(1.5f);
         if (currentButton < buttons.Length)
         {
             buttonController = buttons[currentButton].GetComponent<ButtonController>();
@@ -68,27 +73,26 @@ public class InputController : MonoBehaviour
     bool isFirstButton = true;
     public void OnGameButtonClick(ButtonController button)
     {
+        if (GameManager.Instance.isGameOver)
+        {
+            return;
+        }
         UnityEngine.Debug.Log("ButtonClick");
-        GameManager.Instance.inputController.ActivateButton();       
-        
+        GameManager.Instance.inputController.ActivateButton();
+        if (GameManager.Instance.lineDrawer.lineDrawSpeed == 0)
+        {
+            GameManager.Instance.lineDrawer.lineDrawSpeed = GameManager.Instance.lineDrawer.lineDefaultSpeed;
+        }
         //TODO clicked
         if (isFirstButton)
         {
-            isFirstButton = false;
-            GameManager.Instance.isDrawStarted = true;
+            isFirstButton = false;            
         }
         else
         {
             GameManager.Instance.isComboActive = true;
             GameManager.Instance.SpeedUpDraw();
         }
-    }
-
-    private int ButtonCountInitializer()
-    {
-        int count = this.gameButtons.Count;
-        int nearestMultiple = (int)System.Math.Round((count / (double)4), System.MidpointRounding.AwayFromZero) * 4;
-        return nearestMultiple - 1;
     }
 
     private void OnDestroy()

@@ -6,9 +6,9 @@ using UnityEngine.UI;
 
 public class ButtonController : MonoBehaviour
 {
-    public Button startButton;
+    public Image startButton;
     public Image startButtonInside;
-    public Button endButton;
+    public Image endButton;
     public Image endButtonInside;
     public Image dragRegion;
     public Image dragRegionInside;
@@ -39,24 +39,29 @@ public class ButtonController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (GameManager.Instance.isGameOver)
+        {
+            return;
+        }
         if (this.startButton != null && this.startButton.gameObject.activeSelf && this.buttonTimer.ElapsedMilliseconds > this.duration)
         {
             UnityEngine.Debug.Log("not clicked");
 
             //TODO cant clicked
+            GameManager.Instance.inputController.ActivateWrongClick();
             GameManager.Instance.isComboActive = false;
-            GameManager.Instance.SpeedDownDraw();
             GameManager.Instance.inputController.ActivateButton();
 
             this.buttonTimer.Stop();
             this.buttonTimer.Reset();
-            OnClicked(this);
+            //OnClicked(this);
 
             StartCoroutine(this.FadeAway());
         }
         else if (Input.GetMouseButton(0) && this.beginDragEvent && this.indicatorCollision.isHit)
         {
             //StartCoroutine(this.MoveIndicator());
+            FillButton();
             if (startButton.gameObject.activeSelf)
             {
                 StartCoroutine(StartButtonFadeAway());
@@ -69,10 +74,15 @@ public class ButtonController : MonoBehaviour
 
             StartCoroutine(this.FadeAway());
         }
-        //else if (this.gameButton != null && this.gameButton.gameObject.activeSelf)
-        //{
-        //    this.gameButton.image.color = new Vector4(1 - CalcColor(), CalcColor(), 0, 1);
-        //}
+    }
+
+    public Image DragFill;
+    float dis1, dis2;
+    public void FillButton()
+    {
+        dis1 = Vector3.Distance(startButton.transform.position, Input.mousePosition);
+        dis2 = Vector3.Distance(startButton.transform.position, endButton.transform.position);
+        DragFill.fillAmount = dis1 / dis2;
     }
 
     public void ButtonClicked()
@@ -144,20 +154,26 @@ public class ButtonController : MonoBehaviour
             buttonCollider.enabled = false;
         }
 
-        Color originalColor = this.startButton.image.color;
-        Color finalColor = new Color(this.startButton.image.color.r, this.startButton.image.color.g, this.startButton.image.color.b, 0);
+        Color originalColor = this.startButton.color;
+        Color finalColor = new Color(this.startButton.color.r, this.startButton.color.g, this.startButton.color.b, 0);
 
         float ElapsedTime = 0.0f;
         float TotalTime = 0.6f;
         while (ElapsedTime < TotalTime)
         {
             ElapsedTime += Time.deltaTime;
-            this.endButton.image.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
+            if (startButton.gameObject.activeSelf)
+            {
+                this.startButton.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
+                this.startButtonInside.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime)); 
+            }
+            this.endButton.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
             this.endButtonInside.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
             this.dragRegion.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
             this.dragRegionInside.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
             this.dragDirection.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
             this.indicator.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
+            this.DragFill.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
 
             yield return null;
         }
@@ -173,20 +189,20 @@ public class ButtonController : MonoBehaviour
             buttonCollider.enabled = false;
         }
 
-        Color originalColor = this.startButton.image.color;
-        Color finalColor = new Color(this.startButton.image.color.r, this.startButton.image.color.g, this.startButton.image.color.b, 0);
+        Color originalColor = this.startButton.color;
+        Color finalColor = new Color(this.startButton.color.r, this.startButton.color.g, this.startButton.color.b, 0);
 
         float ElapsedTime = 0.0f;
         float TotalTime = 0.6f;
         while (ElapsedTime < TotalTime)
         {
             ElapsedTime += Time.deltaTime;
-            this.startButton.image.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
+            this.startButton.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
             this.startButtonInside.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
 
             yield return null;
         }
-
+        startButton.gameObject.SetActive(false);
     }
 
 }
