@@ -45,7 +45,7 @@ public class InputController : MonoBehaviour
         {
             WrongLine3.GetComponent<LineRenderer>().SetPosition(0, GameManager.Instance.lineDrawer.pointAlongLine);
             WrongLine3.SetActive(true);
-            GameManager.Instance.Lose();            
+            GameManager.Instance.StartLose();            
         }
     }
 

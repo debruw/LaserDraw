@@ -27,7 +27,7 @@ public class LineDrawer : MonoBehaviour
         dist = Vector3.Distance(LinePoints[0].position, LinePoints[1].position);
     }
 
-    int i;
+    public int i;
     [HideInInspector]
     public Vector3 pointA, pointB, pointAlongLine;
     bool isLast;
@@ -42,9 +42,11 @@ public class LineDrawer : MonoBehaviour
         {
             Sparks.SetActive(true);
         }
+        //Debug.Log(counter + " >? " + dist);
         if (counter < dist)
         {
-            Debug.Log("1");
+            //Debug.Log("1");
+            //Debug.Log(lineDrawSpeed * Time.deltaTime);
             counter += lineDrawSpeed * Time.deltaTime;
 
             float x = Mathf.Lerp(0, dist, counter);
@@ -63,11 +65,12 @@ public class LineDrawer : MonoBehaviour
         }
         else
         {
-            Debug.Log("2");
+            //Time.timeScale = 0;
+            //Debug.Log("2");
             LineRenderer.SetPosition(i + 1, pointB);
             if (pointLight.intensity < 4.25f)
             {
-                pointLight.intensity += (4.25f / LinePoints.Length);
+                pointLight.intensity += (0.75f / LinePoints.Length);
             }
             if (LinePoints.Length - 1 > i + 1)
             {
@@ -90,6 +93,7 @@ public class LineDrawer : MonoBehaviour
             {
                 LineRenderer.colorGradient = RainbowColors[0];
                 Sparks.SetActive(false);
+                BeamEffect.gameObject.SetActive(false);
                 GameManager.Instance.inputController.gameTimer.Stop();
                 StartCoroutine(WaitAndChangeColor());
                 GameManager.Instance.isDrawStarted = false;

@@ -26,14 +26,25 @@ public class GameManager : MonoBehaviour
     public InputController inputController;
     public LineDrawer lineDrawer;
     public bool isGameOver, isDrawStarted, isComboActive;
+    public int currentLevel;
+    int MaxLevelNumber = 3;
 
     #region UI Elements
-    public Text CountDownText;
+    public Text CountDownText, LevelText;
     public GameObject WinPanel, LosePanel, IngamePanel;
     #endregion
 
     private void Start()
     {
+        currentLevel = PlayerPrefs.GetInt("LevelId");
+        LevelText.text = "Level " + currentLevel;
+        if (currentLevel == 1 || currentLevel == 7)
+        {
+            //if (TutorialCanvas != null)
+            //{
+            //    TutorialCanvas.SetActive(true);
+            //}
+        }
         StartCoroutine(Countdown(3));
     }
 
@@ -60,9 +71,30 @@ public class GameManager : MonoBehaviour
         GameManager.Instance.isDrawStarted = true;
     }
 
-    public void Restart()
+    public void NextLevelClick()
     {
-        SceneManager.LoadScene(0);
+        if (currentLevel > MaxLevelNumber)
+        {
+            int rand = Random.Range(1, MaxLevelNumber);
+            if (rand == PlayerPrefs.GetInt("LastRandomLevel"))
+            {
+                rand = Random.Range(1, MaxLevelNumber);
+            }
+            else
+            {
+                PlayerPrefs.SetInt("LastRandomLevel", rand);
+            }
+            SceneManager.LoadScene("Level" + rand);
+        }
+        else
+        {
+            SceneManager.LoadScene("Level" + currentLevel);
+        }
+    }
+
+    public void RetryClick()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 
     public void SpeedUpDraw()
@@ -85,11 +117,13 @@ public class GameManager : MonoBehaviour
 
     void GameWin()
     {
+        currentLevel++;
+        PlayerPrefs.SetInt("LevelId", currentLevel);
         IngamePanel.SetActive(false);
         WinPanel.SetActive(true);
     }
 
-    public void Lose()
+    public void StartLose()
     {
         isGameOver = true;
         lineDrawer.Sparks.SetActive(false);
