@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class ButtonController : MonoBehaviour
@@ -15,7 +16,6 @@ public class ButtonController : MonoBehaviour
     public Image dragDirection;
     private Stopwatch buttonTimer;
     public Image indicator;
-    public IndicatorCollision indicatorCollision;
 
     public float duration;
 
@@ -23,7 +23,7 @@ public class ButtonController : MonoBehaviour
 
     public delegate void ButtonClick(ButtonController button);
     public static event ButtonClick OnClicked;
-
+    public GameObject MissedText;
 
     public void InitializeButton(float start)
     {
@@ -43,36 +43,41 @@ public class ButtonController : MonoBehaviour
         {
             return;
         }
-        if (this.startButton != null && this.startButton.gameObject.activeSelf && this.buttonTimer.ElapsedMilliseconds > this.duration)
+        if (this.startButton.gameObject.activeSelf && this.buttonTimer.ElapsedMilliseconds > this.duration)
         {
-            UnityEngine.Debug.Log("not clicked");
-
-            //TODO cant clicked
-            GameManager.Instance.inputController.ActivateWrongClick();
-            GameManager.Instance.isComboActive = false;
-            GameManager.Instance.inputController.ActivateButton();
-
-            this.buttonTimer.Stop();
-            this.buttonTimer.Reset();
-            //OnClicked(this);
+            UnityEngine.Debug.Log("<color=red>Miss the click</color>");
+            Instantiate(MissedText, transform.position, Quaternion.identity, GameManager.Instance.inputController.gameObject.transform);
+            //TODO miss the click          
+            WrongClickAction();
 
             StartCoroutine(this.FadeAway());
         }
-        else if (Input.GetMouseButton(0) && this.beginDragEvent && this.indicatorCollision.isHit)
+        else if (Input.GetMouseButton(0) && this.beginDragEvent)
         {
-            //StartCoroutine(this.MoveIndicator());
             FillButton();
-            if (startButton.gameObject.activeSelf)
-            {
-                StartCoroutine(StartButtonFadeAway());
-            }
         }
         else if (Input.GetMouseButtonUp(0) && this.beginDragEvent)
         {
-            this.buttonTimer.Stop();
-            OnClicked(this);
+            GraphicRaycaster gr = FindObjectOfType<GraphicRaycaster>();
+            PointerEventData ped = new PointerEventData(null);
+            ped.position = Input.mousePosition;
+            List<RaycastResult> results = new List<RaycastResult>();
+            gr.Raycast(ped, results);
+            foreach (var item in results)
+            {
+                if (item.gameObject.CompareTag("EndButton"))
+                {
+                    this.buttonTimer.Stop();
+                    OnClicked(this);
 
-            StartCoroutine(this.FadeAway());
+                    StartCoroutine(this.FadeAway());
+                    return;
+                }
+            }
+            //if we cant find true button then its a WRONG click
+            UnityEngine.Debug.Log("<color=red>Wrong Click</color>");
+            Instantiate(MissedText, transform.position, Quaternion.identity, GameManager.Instance.inputController.gameObject.transform);
+            WrongClickAction();
         }
     }
 
@@ -85,42 +90,42 @@ public class ButtonController : MonoBehaviour
         DragFill.fillAmount = dis1 / dis2;
     }
 
-    public void ButtonClicked()
+    public void StartButtonOnPointerDown()
     {
+        UnityEngine.Debug.Log("Pointer down");
         this.beginDragEvent = true;
         indicator.gameObject.SetActive(false);
         StartButtonScaleUpper();
+        StartCoroutine(StartButtonFadeAway());
     }
 
-    public float CalcPerfectTime()
+    public void WrongClickAction()
     {
-        return ((this.duration) / 2f);
-    }
-
-    public float CalcColor()
-    {
-        if (((this.buttonTimer.ElapsedMilliseconds) / CalcPerfectTime()) <= 1f)
-        {
-            return (this.buttonTimer.ElapsedMilliseconds) / CalcPerfectTime();
-        }
-        else if ((duration - this.buttonTimer.ElapsedMilliseconds) / CalcPerfectTime() <= 1)
-        {
-            return (duration - this.buttonTimer.ElapsedMilliseconds) / CalcPerfectTime();
-        }
-        return 0;
+        //Stop timer
+        this.buttonTimer.Stop();
+        //Reset timer
+        this.buttonTimer.Reset();
+        //Fade away button
+        StartCoroutine(this.FadeAway());
+        //Reset combo state
+        GameManager.Instance.isComboActive = false;
+        //Activate wrong click actions
+        GameManager.Instance.inputController.ActivateWrongClick();
+        //Trigger next button
+        GameManager.Instance.inputController.ActivateButton();
 
     }
 
     private IEnumerator ScaleIndicator()
     {
         Vector3 originalScale = this.indicator.transform.localScale;
-        Vector3 destinationScale = new Vector3(0.7f, 0.7f, 0.7f);
+        Vector3 destinationScale = new Vector3(0.6f, 0.6f, 0.6f);
 
         if (this.buttonTimer.IsRunning)
         {
-            while (this.buttonTimer.ElapsedMilliseconds < (this.duration / 2f))
+            while (this.buttonTimer.ElapsedMilliseconds < (this.duration))
             {
-                this.indicator.transform.localScale = Vector3.Lerp(originalScale, destinationScale, this.buttonTimer.ElapsedMilliseconds / (this.duration / 2f));
+                this.indicator.transform.localScale = Vector3.Lerp(originalScale, destinationScale, this.buttonTimer.ElapsedMilliseconds / (this.duration));
                 yield return null;
             }
         }
@@ -165,7 +170,7 @@ public class ButtonController : MonoBehaviour
             if (startButton.gameObject.activeSelf)
             {
                 this.startButton.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
-                this.startButtonInside.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime)); 
+                this.startButtonInside.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
             }
             this.endButton.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
             this.endButtonInside.color = Color.Lerp(originalColor, finalColor, (ElapsedTime / TotalTime));
@@ -193,7 +198,7 @@ public class ButtonController : MonoBehaviour
         Color finalColor = new Color(this.startButton.color.r, this.startButton.color.g, this.startButton.color.b, 0);
 
         float ElapsedTime = 0.0f;
-        float TotalTime = 0.6f;
+        float TotalTime = 0.5f;
         while (ElapsedTime < TotalTime)
         {
             ElapsedTime += Time.deltaTime;
@@ -204,5 +209,4 @@ public class ButtonController : MonoBehaviour
         }
         startButton.gameObject.SetActive(false);
     }
-
 }

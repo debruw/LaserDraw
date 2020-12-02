@@ -16,6 +16,7 @@ public class LineDrawer : MonoBehaviour
     public float lineDefaultSpeed;
     public Light pointLight;
     public Gradient[] RainbowColors;
+    public GameObject BeamEffect2;
 
     private void Start()
     {

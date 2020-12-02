@@ -104,14 +104,14 @@ public class GameManager : MonoBehaviour
 
     public GameObject Fireworks;
     public void ExplodeFireworks()
-    {
+    {        
         Fireworks.SetActive(true);
         StartCoroutine(WaitAndWin());
     }
 
     IEnumerator WaitAndWin()
-    {
-        yield return new WaitForSeconds(1f);
+    {        
+        yield return new WaitForSeconds(1f);        
         GameWin();
     }
 
@@ -119,25 +119,27 @@ public class GameManager : MonoBehaviour
     {
         currentLevel++;
         PlayerPrefs.SetInt("LevelId", currentLevel);
+        inputController.CloseWrongLines();
         IngamePanel.SetActive(false);
         WinPanel.SetActive(true);
     }
 
     public void StartLose()
     {
-        isGameOver = true;
+        isGameOver = true;        
         lineDrawer.Sparks.SetActive(false);
         StartCoroutine(WaitAndLose());
     }
 
     IEnumerator WaitAndLose()
-    {
-        yield return new WaitForSeconds(1f);
+    {       
+        yield return new WaitForSeconds(1f);        
         GameLose();
     }
 
     void GameLose()
     {
+        inputController.CloseWrongLines();
         IngamePanel.SetActive(false);
         LosePanel.SetActive(true);
     }

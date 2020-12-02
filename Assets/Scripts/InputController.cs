@@ -31,21 +31,21 @@ public class InputController : MonoBehaviour
     public void ActivateWrongClick()
     {
         GameManager.Instance.lineDrawer.lineDrawSpeed = 0;
-        if(!WrongLine1.gameObject.activeSelf)
+        if (!WrongLine1.gameObject.activeSelf)
         {
             WrongLine1.GetComponent<LineRenderer>().SetPosition(0, GameManager.Instance.lineDrawer.pointAlongLine);
             WrongLine1.SetActive(true);
         }
-        else if(WrongLine1.gameObject.activeSelf && !WrongLine2.gameObject.activeSelf)
+        else if (WrongLine1.gameObject.activeSelf && !WrongLine2.gameObject.activeSelf)
         {
             WrongLine2.GetComponent<LineRenderer>().SetPosition(0, GameManager.Instance.lineDrawer.pointAlongLine);
             WrongLine2.SetActive(true);
         }
-        else if(WrongLine2.gameObject.activeSelf)
+        else if (WrongLine2.gameObject.activeSelf)
         {
             WrongLine3.GetComponent<LineRenderer>().SetPosition(0, GameManager.Instance.lineDrawer.pointAlongLine);
             WrongLine3.SetActive(true);
-            GameManager.Instance.StartLose();            
+            GameManager.Instance.StartLose();
         }
     }
 
@@ -62,22 +62,33 @@ public class InputController : MonoBehaviour
     IEnumerator WaitAndActivate()
     {
         yield return new WaitForSeconds(1.5f);
-        if (currentButton < buttons.Length)
+        if (GameManager.Instance.lineDrawer.i < GameManager.Instance.lineDrawer.LinePoints.Length - 2)
         {
-            buttonController = buttons[currentButton].GetComponent<ButtonController>();
-            buttonController.InitializeButton(gameTimer.ElapsedMilliseconds);
-            currentButton++;
+            if (currentButton < buttons.Length)
+            {
+                buttonController = buttons[currentButton].GetComponent<ButtonController>();
+                buttonController.InitializeButton(gameTimer.ElapsedMilliseconds);
+                currentButton++;
+            }
+        }
+        else
+        {
+            UnityEngine.Debug.Log("<color=yellow/> !!! </color>");
         }
     }
 
     bool isFirstButton = true;
+    public GameObject FloatingText;
+    public string[] FloatingStrings;
     public void OnGameButtonClick(ButtonController button)
     {
         if (GameManager.Instance.isGameOver)
         {
             return;
         }
-        UnityEngine.Debug.Log("ButtonClick");
+        UnityEngine.Debug.Log("<color=green>ButtonClick</color>");
+        Text go = Instantiate(FloatingText, button.endButton.transform.position, Quaternion.identity, transform).GetComponent<Text>();
+        go.text = FloatingStrings[Random.Range(0, FloatingStrings.Length)];
         GameManager.Instance.inputController.ActivateButton();
         if (GameManager.Instance.lineDrawer.lineDrawSpeed == 0)
         {
@@ -86,13 +97,21 @@ public class InputController : MonoBehaviour
         //TODO clicked
         if (isFirstButton)
         {
-            isFirstButton = false;            
+            isFirstButton = false;
+            GameManager.Instance.lineDrawer.BeamEffect2.SetActive(true);
         }
         else
         {
             GameManager.Instance.isComboActive = true;
             GameManager.Instance.SpeedUpDraw();
         }
+    }
+
+    public void CloseWrongLines()
+    {
+        WrongLine1.SetActive(false);
+        WrongLine2.SetActive(false);
+        WrongLine3.SetActive(false);
     }
 
     private void OnDestroy()
