@@ -25,6 +25,17 @@ public class ButtonController : MonoBehaviour
     public static event ButtonClick OnClicked;
     public GameObject MissedText;
 
+    public Color[] colors;
+
+    private void Start()
+    {
+        int rand = Random.Range(0, colors.Length);
+        startButtonInside.color = colors[rand];
+        endButtonInside.color = colors[rand];
+        dragRegionInside.color = new Color(colors[rand].r, colors[rand].g, colors[rand].b, .4f);
+        DragFill.color = colors[rand];
+    }
+
     public void InitializeButton(float start)
     {
         this.startButton.gameObject.SetActive(true);
@@ -36,6 +47,7 @@ public class ButtonController : MonoBehaviour
         StartCoroutine(this.ScaleIndicator());
     }
 
+    bool isFading = false;
     // Update is called once per frame
     void Update()
     {
@@ -43,7 +55,7 @@ public class ButtonController : MonoBehaviour
         {
             return;
         }
-        if (this.startButton.gameObject.activeSelf && this.buttonTimer.ElapsedMilliseconds > this.duration)
+        if (this.startButton.gameObject.activeSelf && this.buttonTimer.ElapsedMilliseconds > this.duration && !isFading)
         {
             UnityEngine.Debug.Log("<color=red>Miss the click</color>");
             Instantiate(MissedText, transform.position, Quaternion.identity, GameManager.Instance.inputController.gameObject.transform);
@@ -65,7 +77,7 @@ public class ButtonController : MonoBehaviour
             gr.Raycast(ped, results);
             foreach (var item in results)
             {
-                if (item.gameObject.CompareTag("EndButton"))
+                if (item.gameObject.CompareTag("EndButton") && !isFading)
                 {
                     this.buttonTimer.Stop();
                     OnClicked(this);
@@ -74,10 +86,13 @@ public class ButtonController : MonoBehaviour
                     return;
                 }
             }
-            //if we cant find true button then its a WRONG click
-            UnityEngine.Debug.Log("<color=red>Wrong Click</color>");
-            Instantiate(MissedText, transform.position, Quaternion.identity, GameManager.Instance.inputController.gameObject.transform);
-            WrongClickAction();
+            if (!isFading)
+            {
+                //if we cant find true button then its a WRONG click
+                UnityEngine.Debug.Log("<color=red>Wrong Click</color>");
+                Instantiate(MissedText, transform.position, Quaternion.identity, GameManager.Instance.inputController.gameObject.transform);
+                WrongClickAction(); 
+            }
         }
     }
 
@@ -111,8 +126,6 @@ public class ButtonController : MonoBehaviour
         GameManager.Instance.isComboActive = false;
         //Activate wrong click actions
         GameManager.Instance.inputController.ActivateWrongClick();
-        //Trigger next button
-        GameManager.Instance.inputController.ActivateButton();
 
     }
 
@@ -163,7 +176,8 @@ public class ButtonController : MonoBehaviour
         Color finalColor = new Color(this.startButton.color.r, this.startButton.color.g, this.startButton.color.b, 0);
 
         float ElapsedTime = 0.0f;
-        float TotalTime = 0.6f;
+        float TotalTime = 0.5f;
+        isFading = true;
         while (ElapsedTime < TotalTime)
         {
             ElapsedTime += Time.deltaTime;
@@ -182,7 +196,7 @@ public class ButtonController : MonoBehaviour
 
             yield return null;
         }
-
+        GameManager.Instance.inputController.ActivateButton();
         Destroy(this.gameObject);
     }
 

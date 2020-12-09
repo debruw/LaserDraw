@@ -233,6 +233,7 @@ GameObject:
   - component: {fileID: 4356787013062897201}
   - component: {fileID: 4356787013062897203}
   - component: {fileID: 4356787013062897202}
+  - component: {fileID: 6399065953596829622}
   m_Layer: 5
   m_Name: DragRegion
   m_TagString: Untagged
@@ -301,6 +302,21 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &6399065953596829622
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4356787013062897200}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 1, g: 1, b: 1, a: 0.5}
+  m_EffectDistance: {x: 3, y: -3}
+  m_UseGraphicAlpha: 1
 --- !u!1 &4356787013136335560
 GameObject:
   m_ObjectHideFlags: 0
@@ -387,6 +403,7 @@ GameObject:
   - component: {fileID: 4356787013335963206}
   - component: {fileID: 4356787013335963200}
   - component: {fileID: 4356787013335963207}
+  - component: {fileID: 6729488742589319083}
   m_Layer: 5
   m_Name: DragDirection
   m_TagString: Untagged
@@ -450,6 +467,21 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &6729488742589319083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4356787013335963205}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 1, g: 1, b: 1, a: 0.5}
+  m_EffectDistance: {x: 3, y: -3}
+  m_UseGraphicAlpha: 1
 --- !u!1 &4356787014364472522
 GameObject:
   m_ObjectHideFlags: 0
@@ -659,6 +691,12 @@ MonoBehaviour:
   duration: 1500
   MissedText: {fileID: 1210565570356695118, guid: 4fdee423a8390f4419f52fa65f5a51fc,
     type: 3}
+  colors:
+  - {r: 0.7960785, g: 0.023529414, b: 1, a: 1}
+  - {r: 0, g: 0.36862746, b: 1, a: 1}
+  - {r: 0, g: 1, b: 0.11764707, a: 1}
+  - {r: 1, g: 0.8078432, b: 0, a: 1}
+  - {r: 1, g: 0.60967547, b: 0, a: 1}
   DragFill: {fileID: 6208779031617153940}
 --- !u!1 &4664481232899828809
 GameObject:
@@ -745,6 +783,7 @@ GameObject:
   - component: {fileID: 2351426982983281530}
   - component: {fileID: 3364294945605404282}
   - component: {fileID: 1147884569251268371}
+  - component: {fileID: 3896998598894104594}
   m_Layer: 5
   m_Name: Indicator (1)
   m_TagString: Untagged
@@ -808,3 +847,18 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &3896998598894104594
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6678878020582544943}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 1, g: 1, b: 1, a: 0.5}
+  m_EffectDistance: {x: 3, y: -3}
+  m_UseGraphicAlpha: 1

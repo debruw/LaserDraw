@@ -67,8 +67,12 @@ public class LineDrawer : MonoBehaviour
         else
         {
             //Time.timeScale = 0;
-            //Debug.Log("2");
+            //Debug.Log("2");            
             LineRenderer.SetPosition(i + 1, pointB);
+            if (i == 0)
+            {
+                lineDrawSpeed = 0;
+            }
             if (pointLight.intensity < 4.25f)
             {
                 pointLight.intensity += (0.75f / LinePoints.Length);

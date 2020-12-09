@@ -52,6 +52,7 @@ MonoBehaviour:
   WrongLine1: {fileID: 0}
   WrongLine2: {fileID: 0}
   WrongLine3: {fileID: 0}
+  ButtonWaitTime: 0.5
   FloatingText: {fileID: 1210565570356695118, guid: 643f36e17d411704cbf91180a1acf22c,
     type: 3}
   FloatingStrings:

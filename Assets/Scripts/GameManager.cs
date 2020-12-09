@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TapticPlugin;
 
 public class GameManager : MonoBehaviour
 {
@@ -21,48 +22,41 @@ public class GameManager : MonoBehaviour
         {
             _instance = this;
         }
+        if (!PlayerPrefs.HasKey("VIBRATION"))
+        {
+            PlayerPrefs.SetInt("VIBRATION", 1);
+            VibrationButton.GetComponent<Image>().sprite = on;
+        }
+        else
+        {
+            if (PlayerPrefs.GetInt("VIBRATION") == 1)
+            {
+                VibrationButton.GetComponent<Image>().sprite = on;
+            }
+            else
+            {
+                VibrationButton.GetComponent<Image>().sprite = off;
+            }
+        }
     }
 
     public InputController inputController;
     public LineDrawer lineDrawer;
     public bool isGameOver, isDrawStarted, isComboActive;
     public int currentLevel;
-    int MaxLevelNumber = 3;
+    int MaxLevelNumber = 20;
 
     #region UI Elements
     public Text CountDownText, LevelText;
     public GameObject WinPanel, LosePanel, IngamePanel;
+    public Button VibrationButton;
+    public Sprite on, off;
     #endregion
 
     private void Start()
     {
         currentLevel = PlayerPrefs.GetInt("LevelId");
         LevelText.text = "Level " + currentLevel;
-        if (currentLevel == 1 || currentLevel == 7)
-        {
-            //if (TutorialCanvas != null)
-            //{
-            //    TutorialCanvas.SetActive(true);
-            //}
-        }
-        StartCoroutine(Countdown(3));
-    }
-
-    IEnumerator Countdown(int seconds)
-    {
-        int count = seconds;
-
-        while (count > 0)
-        {
-            // display something...
-            CountDownText.text = count.ToString();
-            yield return new WaitForSeconds(1);
-            count--;
-        }
-
-        // count down is finished...
-        CountDownText.gameObject.SetActive(false);
-        StartGame();
     }
 
     public void StartGame()
@@ -117,6 +111,10 @@ public class GameManager : MonoBehaviour
 
     void GameWin()
     {
+        SoundManager.Instance.StopAllSounds();
+        SoundManager.Instance.playSound(SoundManager.GameSounds.Win);
+        if (PlayerPrefs.GetInt("VIBRATION") == 1)
+            TapticManager.Impact(ImpactFeedback.Light);
         currentLevel++;
         PlayerPrefs.SetInt("LevelId", currentLevel);
         inputController.CloseWrongLines();
@@ -139,8 +137,29 @@ public class GameManager : MonoBehaviour
 
     void GameLose()
     {
-        inputController.CloseWrongLines();
+        //inputController.CloseWrongLines();
+        SoundManager.Instance.StopAllSounds();
+        SoundManager.Instance.playSound(SoundManager.GameSounds.Lose);
+        if (PlayerPrefs.GetInt("VIBRATION") == 1)
+            TapticManager.Impact(ImpactFeedback.Light);
         IngamePanel.SetActive(false);
         LosePanel.SetActive(true);
+    }
+
+    public void VibrateButtonClick()
+    {
+        if (PlayerPrefs.GetInt("VIBRATION").Equals(1))
+        {//Vibration is on
+            PlayerPrefs.SetInt("VIBRATION", 0);
+            VibrationButton.GetComponent<Image>().sprite = off;
+        }
+        else
+        {//Vibration is off
+            PlayerPrefs.SetInt("VIBRATION", 1);
+            VibrationButton.GetComponent<Image>().sprite = on;
+        }
+
+        if (PlayerPrefs.GetInt("VIBRATION") == 1)
+            TapticManager.Impact(ImpactFeedback.Light);
     }
 }
